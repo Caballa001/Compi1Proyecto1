@@ -42,6 +42,7 @@ android {
 dependencies {
     implementation(files("libs/java-cup-11b-runtime.jar"))
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation("androidx.compose.material:material3:1.4.3")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
