@@ -1,4 +1,4 @@
-package com.joseruiz.formMaker.ui.screens
+package com.joseruiz.formMaker.ui.components
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -85,15 +85,14 @@ fun ScrollableTable(modifier: Modifier, headers: List<String>, data: List<List<S
 fun PreviewScrollableTable(
     modifier: Modifier = Modifier
 ) {
-    val headers = listOf("ID", "Name", "Age", "City", "Country", "Status")
+    val headers = listOf("Lexema", "Linea", "Columna", "Tipo", "Descripcion")
     val data = List(25) { index ->
         listOf(
+            "Lexema $index",
             (index + 1).toString(),
-            "User $index",
-            (20 + index).toString(),
-            "City $index",
-            "Country $index",
-            if (index % 2 == 0) "Active" else "Inactive"
+            (index + 1).toString(),
+            "Tipo $index",
+            "Descripcion $index"
         )
     }
 
