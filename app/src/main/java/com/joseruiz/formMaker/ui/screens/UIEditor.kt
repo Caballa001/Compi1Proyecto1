@@ -6,8 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -16,9 +15,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -102,22 +104,42 @@ fun UIEditor(navController: NavController) {
                 )
             },
             bottomBar = {
-                BottomAppBar() {
-                    Row(
-                        Modifier.fillMaxWidth(), Arrangement.SpaceEvenly
-                    ) {
-                        Button(onClick = { /* todo */ }) {
-                            Text("Reemplazar")
-                        }
-                        Button(onClick = { /* todo */ }) {
-                            Text("Añadir")
-                        }
-                        Button(onClick = { /* todo */
-                            navController.navigate(Screen.VisualizarForm.route)
-                        }) {
-                            Text("Finalizar")
-                        }
-                    }
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = { /* todo */ },
+                        icon = { Icon(
+                            painter = painterResource(id = R.drawable.refresh_24px),
+                            contentDescription = "Reemplazar") },
+                        label = { Text("Reemplazar") }
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = { /* todo */ },
+                        icon = { Icon(
+                            painter= painterResource(id = R.drawable.add_24px),
+                            contentDescription = "Añadir") },
+                        label = { Text("Añadir") }
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = { /* todo: guardar localmente .FORM */ },
+                        icon = { Icon(
+                            painter = painterResource(id = R.drawable.save_24px),
+                            contentDescription = "Guardar") },
+                        label = { Text("Guardar") }
+                    )
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = {
+                            /* todo: llamar pkmDialogGuardar y metodo para guardar */
+                            navController.navigate(Screen.Menu.route)
+                        },
+                        icon = { Icon(
+                            painter = painterResource(id = R.drawable.check_24px),
+                            contentDescription = "Finalizar") },
+                        label = { Text("Finalizar") }
+                    )
                 }
             },
             modifier = Modifier.fillMaxSize()
@@ -201,5 +223,30 @@ fun CodeEditor(modifier: Modifier = Modifier){
                 )
             )
         }
+    }
+}
+
+@Composable
+fun pkmDialogGuardar(
+    showDialog: Boolean,
+    onSaveLocal: () -> Unit,
+    onSaveRemote: () -> Unit
+){
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onSaveRemote,
+            title = { Text("Ubicacion de guardado") },
+            text = { Text("Desea guardar los archivos localmente o remoto?") },
+            confirmButton = {
+                TextButton(onClick = onSaveLocal) {
+                    Text("LOCAL")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onSaveRemote) {
+                    Text("REMOTO")
+                }
+            }
+        )
     }
 }

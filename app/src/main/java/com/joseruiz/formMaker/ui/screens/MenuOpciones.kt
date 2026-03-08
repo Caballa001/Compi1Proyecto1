@@ -72,19 +72,6 @@ fun MenuOpciones(navController: NavController) {
                             contentColor = Color.Black
                         )
                     ) { Text("Abrir") }
-
-                    TextButton(
-                        onClick = {
-                            // TODO: Implementar API para guardar archivo
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(2.dp, Color.Black),
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = Color.Black
-                        )
-                    ) { Text("Guardar") }
-
                 }
             }
 
@@ -97,7 +84,7 @@ fun MenuOpciones(navController: NavController) {
 
                     TextButton(
                         onClick = {
-                            // TODO: Implementar API para ver archivos de persistencia y cargar
+                            /* TODO: llamar pkmDialogAbrir y metodo para abrir archivo */
                             navController.navigate(Screen.VisualizarForm.route)
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -107,19 +94,6 @@ fun MenuOpciones(navController: NavController) {
                             contentColor = Color.Black
                         )
                     ) { Text("Abrir") }
-
-                    TextButton(
-                        onClick = {
-                            // TODO: implementar metodo para guardar archivo de persistencia y API
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(2.dp, Color.Black),
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = Color.Black
-                        )
-                    ) { Text("Guardar") }
-
                 }
             }
 
@@ -136,3 +110,30 @@ fun MenuOpciones(navController: NavController) {
         }
     }
 }
+
+@Composable
+fun pkmDialogAbrir(
+    showDialog: Boolean,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+){
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Ubicacion de acceso") },
+            text = { Text("Desea acceder a los archivos locales o remotos?") },
+            confirmButton = {
+                TextButton(onClick = onConfirm) {
+                    Text("LOCAL")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) {
+                    Text("REMOTO")
+                }
+            }
+        )
+    }
+}
+
+

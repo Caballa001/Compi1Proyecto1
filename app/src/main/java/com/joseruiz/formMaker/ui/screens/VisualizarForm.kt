@@ -10,16 +10,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
 import com.joseruiz.formMaker.ui.components.Visualizar
+import com.joseruiz.formMaker.R
 
 @Preview
 @Composable
@@ -34,7 +39,27 @@ fun VisualizarForm(navController: NavController) {
 
     Scaffold(
         bottomBar = {
-            BottomAppBar() {
+            NavigationBar() {
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { navController.navigate(Screen.Menu.route) },
+                    icon = { Icon(
+                        painter = painterResource(id = R.drawable.arrow_back_24px),
+                        contentDescription = "Regresar"
+                    ) },
+                    label = { Text("Regresar") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = { /* todo */ },
+                    icon = { Icon(
+                        painter = painterResource(id = R.drawable.send_24px),
+                        contentDescription = "Enviar"
+                    ) },
+                    label = { Text("Enviar")}
+                )
+            }
+            /*BottomAppBar() {
                 Row(
                     Modifier.fillMaxWidth(), Arrangement.SpaceEvenly
                 ) {
@@ -47,7 +72,7 @@ fun VisualizarForm(navController: NavController) {
                         Text("Enviar Respuestas")
                     }
                 }
-            }
+            }*/
         },
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->

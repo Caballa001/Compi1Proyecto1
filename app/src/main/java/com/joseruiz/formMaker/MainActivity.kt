@@ -20,6 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.joseruiz.formMaker.ui.screens.UIEditor
 import com.joseruiz.formMaker.ui.screens.VisualizarForm
+import com.joseruiz.formMaker.ui.screens.ListaDB
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +38,9 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(route = Screen.VisualizarForm.route) {
                     VisualizarForm(navController = navController)
+                }
+                composable(route = Screen.ListaDB.route){
+                    ListaDB(navController = navController)
                 }
             }
 
