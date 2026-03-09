@@ -31,24 +31,30 @@ import java.util.*;
 LineTerminator = \r|\n|\r\n
 WhiteSpace = {LineTerminator} | [ \t\f]
 
+//TODO: Preguntar si formato RGB y HSL es correcto, pasar a tokens individuales
 HexDigit = \#[0-9a-fA-F]{6}
-RGBDigit = \([0-9]{1,2}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5],[0-9]{1,2}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5],[0-9]{1,2}|1[0-9]{1,2}|2[0-4][0-9]|25[0-5]\)
-HSLDigit = \<[0-9]{1,2}|100,[0-9]{1,2}|100,[0-9]{1,2}|100\>
+RGBNumber = [0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]
+RGBDigit = \({RGBNumber},{RGBNumber},{RGBNumber}\)
+HSLNumber = [0-9]|[1-9][0-9]|[12][0-9]{2}|3[0-5][0-9]|360
+HSLNumber2 = [0-9]|[1-9][0-9]|100
+HSLDigit = \<{HSLNumber},{HSLNumber2},{HSLNumber2}\>
 ColorSpelled = "RED" | "BLUE" | "GREEN" | "PURPLE" | "SKY" | "YELLOW" | "BLACK" | "WHITE"
 Color = {HexDigit} | {RGBDigit} | {HSLDigit} | {ColorSpelled}
 
 
-//TODO : Revisar donde van, en macros o en tokens
+//TODO : Pasar los typeX como tokens individuales
 paramColor = \"color\"
 paramBackground = \"background color\"
+typeFont = "MONO" | "CURSIVE" | "SANS_SERIF"
 paramFont = \"font family\"
 paramSize = \"text size\"
+typeBorder = "LINE" | "DOTTED" | "DOUBLE"
 paramBorder = \"border\"
 
 Integer = [0-9]+
 Float = [0-9]+ \. [0-9]+
-Number = {Float} | {Integer}
 
+//Todo: pasar los emoticones como tokens individuales
 Smile = @\[:[\)]+\] | @\[:smile:\]
 Sad = @\[:[\(]+\] | @\[:sad:\]
 Serious = @\[:[\|]+\] | @\[:serious:\]
@@ -57,7 +63,13 @@ Star = @\[:star:\] | @\[:star:{Integer}:\] | @\[:star-{Integer}:\]
 Cat = @\[:cat:\] | @\[:\^\^:\]
 Emote = {Smile} | {Sad} | {Serious} | {Heart} | {Star} | {Cat}
 
+Number = {Float} | {Integer}
 
+lineComment = "$"[^\\n]*
+blockComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
+Comment = {lineComment} | {blockComment}
+
+idVar = [a-zA-Z_][a-zA-Z0-9_]*
 
 %{
     /****************** codigo de usuario ***********************/
@@ -66,22 +78,22 @@ Emote = {Smile} | {Sad} | {Serious} | {Heart} | {Star} | {Cat}
 
     /* Codigo para el manejo de errores */
 
-    private List<String> errorList;
+    private List<ErrorReport> errorList;
 
-    public List<String> getLexicalErrors(){
+    public List<ErrorReport> getLexicalErrors(){
         return this.errorList;
     }
 
     /*-----------------------------------------------
           Codigo para el parser
     -------------------------------------------------*/
-    private Symbol symbol(int type){
-        return new Symbol(type, yyline+1, yycolumn+1);
+    private Symbol symbol(int type, Object valor){
+        return new Symbol(type, yyline+1, yycolumn+1, valor);
     }
 
     private void error(String message){
         /* Lexema | linea | columna | tipo | desc */
-         errorList.add(message, yyline+1, yycolumn+1, "Lexico", "Simbolo no reconocido");
+         errorList.add(new ErrorReport(message, yyline+1, yycolumn+1, "Lexico", "Simbolo no reconocido"));
     }
 
 %}
@@ -113,9 +125,9 @@ Emote = {Smile} | {Sad} | {Serious} | {Heart} | {Star} | {Cat}
     "&&"                { return symbol(sym.AND); }
     "~"                 { return symbol(sym.NOT); }
 
-    "number"            { return symbol(sym.NUMBER); }
-    "string"            { return symbol(sym.STRING); }
-    "special"           { return symbol(sym.SPECIAL); }
+    "number"            { return symbol(sym.TYPENUMBER); }
+    "string"            { return symbol(sym.TYPESTRING); }
+    "special"           { return symbol(sym.TYPESPECIAL); }
     "="                { return symbol(sym.ASSIGN); }
 
     "{"                 { return symbol(sym.LBRACE); }
@@ -123,15 +135,17 @@ Emote = {Smile} | {Sad} | {Serious} | {Heart} | {Star} | {Cat}
     "["                 { return symbol(sym.LBRACKET); }
     "]"                 { return symbol(sym.RBRACKET); }
     ":"                 { return symbol(sym.COLON); }
+    ";"                 { return symbol(sym.SEMICOLON); }
     ","                 { return symbol(sym.COMMA); }
+    "."                 { return symbol(sym.DOT); }
     "?"                 { return symbol(sym.COMODIN); }
-    "$"                 { return symbol(sym.LCOMMENT); }
-    "/*"                { return symbol(sym.BCOMMENTL); }
-    "*/"                { return symbol(sym.BCOMMENTR); }
 
     "SECTION"           { return symbol(sym.SECTION); }
     "width"              { return symbol(sym.WIDTH); }
     "height"            { return symbol(sym.HEIGHT); }
+    "label"             { return symbol(sym.LABEL); }
+    "options"           { return symbol(sym.OPTIONS); }
+    "content"           { return symbol(sym.CONTENT); }
     "pointX"            { return symbol(sym.POINTX); }
     "pointY"            { return symbol(sym.POINTY); }
     "orientation"       { return symbol(sym.ORIENTATION); }
@@ -139,7 +153,36 @@ Emote = {Smile} | {Sad} | {Serious} | {Heart} | {Star} | {Cat}
     "HORIZONTAL"        { return symbol(sym.HORIZONTAL); }
     "elements"            { return symbol(sym.ELEMENTS); }
     "styles"              { return symbol(sym.STYLES); }
+    "TABLE"               { return symbol(sym.TABLE); }
+    "TEXT"                { return symbol(sym.TEXT); }
+    "OPEN_QUESTION"         { return symbol(sym.OPEN_QUESTION); }
+    "DROP_QUESTION"         { return symbol(sym.DROP_QUESTION); }
+    "correct"             { return symbol(sym.CORRECT); }
+    "SELECT_QUESTION"       { return symbol(sym.SELECT_QUESTION); }
+    "MULTIPLE_QUESTION"     { return symbol(sym.MULTIPLE_QUESTION); }
+    "draw"               { return symbol(sym.DRAW); }
 
+    "IF"                { return symbol(sym.IF); }
+    "ELSE"              { return symbol(sym.ELSE); }
+    "WHILE"             { return symbol(sym.WHILE); }
+    "DO"                { return symbol(sym.DO); }
+    "FOR"               { return symbol(sym.FOR); }
+    "in"                { return symbol(sym.IN); }
+    "..."               { return symbol(sym.RANGE); }
+
+    {Color}             { return symbol(sym.COLOR, yytext()); }
+    {Number}            { return symbol(sym.NUMBER, yytext()); }
+    {Emote}             { return symbol(sym.EMOTE, yytext()); }
+
+    {paramColor}        { return symbol(sym.PARAMCOLOR); }
+    {paramBackground}   { return symbol(sym.PARAMBACKGROUND); }
+    {paramFont}         { return symbol(sym.PARAMFONT); }
+    {paramSize}         { return symbol(sym.PARAMSIZE); }
+    {paramBorder}       { return symbol(sym.PARAMBORDER); }
+    {typeFont}         { return symbol(sym.TYPEFONT, yytext()); }
+    {typeBorder}       { return symbol(sym.TYPEBORDER, yytext()); }
+    {idVar}             { return symbol(sym.ID, yytext()); }
+    {Comment}           {}
 
     \"                  { string.setLength(0); yybegin(STRING); }
 
@@ -150,7 +193,7 @@ Emote = {Smile} | {Sad} | {Serious} | {Heart} | {Star} | {Cat}
 <STRING> {
     \"                  {
                             yybegin(YYINITIAL);
-                            return symbol(sym.COMPLEMENT);
+                            return symbol(sym.STRCHAIN, string.toString());
 
                         }
     [^\n\r\"\\]+        { string.append( yytext() ); }
