@@ -1,0 +1,236 @@
+1 > 0 || 1 < 10 || 4 !! 5
+1 > 0 && 1 < 10 && 4 !! 5
+
+number myWidth
+string name
+
+number myHeight = 10.0
+string lastname = "Hola"
+
+name = "pokemon"
+
+number myVar = 10
+number myVar = 20.10
+
++ Suma 1
+- Resta 1
+* Multiplicación 2
+/ División 2
+^ Potenciación 3
+% Módulo 3
+( ) Paréntesis 4
+
+> Mayor que 0
+>= Mayor o igual que 0
+< Menor que 0
+<= Menor o igual que 0
+== Igualdad 0
+!! Diferente 0
+
+|| o 1
+&& y 1
+~ no 2
+
+number
+string
+special
+
+special myQuestion = OPEN_QUESTION [
+width: number,
+height: number,
+label: number
+]
+myQuestion.draw()
+
+special myQuestion = OPEN_QUESTION [
+width: ?,
+height: 10 + ?,
+label: number,
+]
+myQuestion.draw(10, 4)
+
+$ esto es un comentario
+/*
+Esto es un comentario de varias líneas
+*/
+
+@[:)] @[:smile:]  Debe aceptar uno o más paréntesis para la boca.
+@[:(] @[:sad:]  Debe aceptar uno o más paréntesis para la boca.
+@[:|] @[:serious:]  Debe aceptar uno o más paréntesis para la boca.
+@[<3] @[:heart:] ️ Puede aceptar varias veces el símbolo < y también el número
+3, pero tiene que seguir el orden.
+@[:star:]
+
+@[:star:number:]
+@[:star-number:] Permite agregar muchas estrellas a la vez, según el número.
+@[:^^:] @[:cat:]
+
+(?:rgb\\((?:\\s*(?:\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\s*,?){3}\\))
+
+#FFFFFF Formato Hex
+(10,10,10) Formato RGB
+<10,10,10> Formato HSL
+RED, BLUE, GREEN, PURPLE, SKY, YELLOW,
+BLACK, WHITE
+Colores bases predefinidos
+
+SECTION [
+    with: number,
+    height: number,
+    pointX: number,
+    pointY: number,
+    orientation: VERTICAL,
+    elements: {
+    },
+    TODO: Seguir
+    styles [
+        "color": color,
+        "background color": color,
+        "font family": MONO,
+        "text size": number,
+        "border": (number, TYPE, color)
+    ]
+]
+
+SECTION [
+    with: number,
+    height: number,
+    pointX: number,
+    pointY: number,
+    elements: {
+        SECTION [ ... ],
+        SECTION [ ... ]
+    }
+]
+
+TABLE [
+    width: number,
+    height: number,
+    pointX: number,
+    pointY: number,
+    elements: {
+        [ $ primera línea
+            {
+                $ elemento 1
+            },
+            {
+                $ elemento 2
+            },
+            {
+                $ elemento 3
+            }
+        ],
+        [ $ segunda línea
+            {
+                $ elemento 4
+            },
+            {
+                $ elemento 5
+            },
+            {
+                $ elemento 6
+            }
+        ]
+    },
+    styles [
+        "color": color,
+        "background color": color,
+        "font family": MONO,
+        "text size": number,
+        "border": (number, TYPE, color)
+    ]
+]
+
+TEXT [
+    width: number, $ opcional
+    height: number, $ opcional
+    content: "string",
+    $ opcional
+    styles [
+        "color": color
+        "background color": color
+        "font family": MONO,
+        "text size": number
+    ]
+]
+
+OPEN_QUESTION [
+    width: number, $ opcional
+    height: number, $ opcional
+    label: "string",
+    $ los estilos son opcionales
+    styles [
+        "color": color,
+        "background color": color,
+        "font family": MONO,
+        "text size": number
+    ]
+]
+
+DROP_QUESTION [
+    width: number, $ opcional
+    height: number, $ opcional
+    label: "string",
+    options: {"first", "second"}, /// options: who_is_that_pokemon(NUMBER, 1, 10)
+    correct: number,
+    styles [
+        "color": color,
+        "background color": color,
+        "font family": MONO,
+        "text size": number
+    ]
+]
+
+SELECT_QUESTION [
+    width: number, $ opcional
+    height: number, $ opcional
+    options: {"first", "second", "third"},
+    correct: number,
+    styles [
+        "color": color,
+        "background color": color,
+        "font family": MONO,
+        "text size": number
+    ]
+]
+
+MULTIPLE_QUESTION [
+    width: number, $ opcional
+    height: number, $ opcional
+    options: {"first", "second", "third"},
+    $ opcional
+    correct: {number, number},
+    $ los estilos son opcionales
+    styles [
+        "color": color,
+        "background color": color,
+        "font family": MONO,
+        "text size": number
+    ]
+]
+
+IF ( 10 > 10 ) {
+    /*
+    Definición o asignación de variables,
+    Preguntas
+    U otros bloques de código
+    */
+} ELSE IF ( 10 < 50 ) {
+    $ Esta sección es opcional
+} ELSE {
+    $ Esta sección es opcional
+}
+
+WHILE ( 10 > 10 ) {
+    $ instrucciones
+}
+
+DO {
+    $ instrucciones
+} WHILE ( 10 < 10 || 10 < 10 )
+
+FOR (i = 0 ; i <= 10 ; i = i + 1 ) {
+}
+
+FOR (i in 1 .. 5) {
+}
