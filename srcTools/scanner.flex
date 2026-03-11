@@ -31,37 +31,30 @@ import java.util.*;
 LineTerminator = \r|\n|\r\n
 WhiteSpace = {LineTerminator} | [ \t\f]
 
-//TODO: Preguntar si formato RGB y HSL es correcto, pasar a tokens individuales
-HexDigit = \#[0-9a-fA-F]{6}
+HexCode = \#[0-9a-fA-F]{6}
 RGBNumber = [0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]
-RGBDigit = \({RGBNumber},{RGBNumber},{RGBNumber}\)
+RGBCode = \({RGBNumber},{RGBNumber},{RGBNumber}\)
 HSLNumber = [0-9]|[1-9][0-9]|[12][0-9]{2}|3[0-5][0-9]|360
 HSLNumber2 = [0-9]|[1-9][0-9]|100
-HSLDigit = \<{HSLNumber},{HSLNumber2},{HSLNumber2}\>
-ColorSpelled = "RED" | "BLUE" | "GREEN" | "PURPLE" | "SKY" | "YELLOW" | "BLACK" | "WHITE"
-Color = {HexDigit} | {RGBDigit} | {HSLDigit} | {ColorSpelled}
+HSLCode = \<{HSLNumber},{HSLNumber2},{HSLNumber2}\>
 
-
-//TODO : Pasar los typeX como tokens individuales
 paramColor = \"color\"
 paramBackground = \"background color\"
-typeFont = "MONO" | "CURSIVE" | "SANS_SERIF"
 paramFont = \"font family\"
 paramSize = \"text size\"
-typeBorder = "LINE" | "DOTTED" | "DOUBLE"
 paramBorder = \"border\"
 
 Integer = [0-9]+
 Float = [0-9]+ \. [0-9]+
 
-//Todo: pasar los emoticones como tokens individuales
 Smile = @\[:[\)]+\] | @\[:smile:\]
 Sad = @\[:[\(]+\] | @\[:sad:\]
 Serious = @\[:[\|]+\] | @\[:serious:\]
 Heart = @\[[<]+[3]+\] | @\[:heart:\]
-Star = @\[:star:\] | @\[:star:{Integer}:\] | @\[:star-{Integer}:\]
+StarSimple = @\[:star:\]
+StarCols = @\[:star:[0-9]+:\]
+StarDash = @\[:star-[0-9]+:\]
 Cat = @\[:cat:\] | @\[:\^\^:\]
-Emote = {Smile} | {Sad} | {Serious} | {Heart} | {Star} | {Cat}
 
 Number = {Float} | {Integer}
 
@@ -74,28 +67,60 @@ idVar = [a-zA-Z_][a-zA-Z0-9_]*
 %{
     /****************** codigo de usuario ***********************/
 
-    StringBuffer string;
+        StringBuffer string;
+        ArrayList<Integer> RGBvalues = new ArrayList<>();
+        ArrayList<Float> HSLvalues = new ArrayList<>();
 
-    /* Codigo para el manejo de errores */
+        /* Codigo para devolver valores utiles al parser */
 
-    private List<ErrorReport> errorList;
+        private ArrayList<Integer> extractRBGvalues(String rgbText){
+            RGBvalues.clear();
+            String[] values = rgbText.substring(1, rgbText.length() - 1).split(",");
+            for (String value : values) {
+                RGBvalues.add(Integer.parseInt(value.trim()));
+            }
+            return new ArrayList<>(RGBvalues);
+        }
 
-    public List<ErrorReport> getLexicalErrors(){
-        return this.errorList;
-    }
+        private ArrayList<Float> extractHSLvalues(String hslText){
+            HSLvalues.clear();
+            String[] values = hslText.substring(1, hslText.length() - 1).split(",");
+            for (int i = 0; i < values.length; i++) {
+                float val  = Float.parseFloat(values[i].trim());
+                if (i == 0) {
+                    HSLvalues.add(val % 360);
+                } else {
+                    float porcentaje = Math.max(0, Math.min(100, val)) / 100f;
+                    HSLvalues.add(porcentaje);
+                }
+            }
+            return new ArrayList<>(HSLvalues) ;
+        }
 
-    /*-----------------------------------------------
-          Codigo para el parser
-    -------------------------------------------------*/
-    private Symbol symbol(int type, Object valor){
-        return new Symbol(type, yyline+1, yycolumn+1, valor);
-    }
+        private Integer extractStars(String starText){
+           String cleaned = starText.replaceAll("[^0-9]", "");
+           return Integer.parseInt(cleaned);
+        }
 
-    private void error(String message){
-        /* Lexema | linea | columna | tipo | desc */
-         errorList.add(new ErrorReport(message, yyline+1, yycolumn+1, "Lexico", "Simbolo no reconocido"));
-    }
+        /* Codigo para el manejo de errores */
 
+        private List<ErrorReport> errorList;
+
+        public List<ErrorReport> getLexicalErrors(){
+            return this.errorList;
+        }
+
+        /*-----------------------------------------------
+              Codigo para el parser
+        -------------------------------------------------*/
+        private Symbol symbol(int type, Object valor){
+            return new Symbol(type, yyline+1, yycolumn+1, valor);
+        }
+
+        private void error(String message){
+            /* Lexema | linea | columna | tipo | desc */
+             errorList.add(new ErrorReport(message, yyline+1, yycolumn+1, "Lexico", "Simbolo no reconocido"));
+        }
 %}
 
 
@@ -170,17 +195,52 @@ idVar = [a-zA-Z_][a-zA-Z0-9_]*
     "in"                { return symbol(sym.IN); }
     "..."               { return symbol(sym.RANGE); }
 
-    {Color}             { return symbol(sym.COLOR, yytext()); }
-    {Number}            { return symbol(sym.NUMBER, yytext()); }
-    {Emote}             { return symbol(sym.EMOTE, yytext()); }
+    // Color cases
+    "RED"               { return symbol(sym.RED); }
+    "BLUE"              { return symbol(sym.BLUE); }
+    "GREEN"             { return symbol(sym.GREEN); }
+    "PURPLE"            { return symbol(sym.PURPLE); }
+    "SKY"               { return symbol(sym.SKY); }
+    "YELLOW"            { return symbol(sym.YELLOW); }
+    "BLACK"             { return symbol(sym.BLACK); }
+    "WHITE"             { return symbol(sym.WHITE); }
+
+    {HexCode}          { return symbol(sym.HEX_COLOR, yytext()); }
+    {RGBCode}          { return symbol(sym.RGB_COLOR, extractRBGvalues(yytext())); }
+    {HSLCode}          { return symbol(sym.HSL_COLOR, extractHSLvalues(yytext())); }
+
+    {Number}            {
+                        String numText = yytext();
+                        if (numText.contains(".")) {
+                            return symbol(sym.NUMBER, Double.parseDouble(numText));
+                         } else {
+                            return symbol(sym.NUMBER, Integer.parseInt(numText));
+                         }
+                        }
+
+    {Smile}             { return symbol(sym.SMILE); }
+    {Sad}               { return symbol(sym.SAD); }
+    {Serious}           { return symbol(sym.SERIOUS); }
+    {Heart}             { return symbol(sym.HEART); }
+    {StarSimple}        { return symbol(sym.STAR); }
+    {StarCols}          { return symbol(sym.STAR_COLS, extractStars(yytext())); }
+    {StarDash}          { return symbol(sym.STAR_DASH, extractStars(yytext())); }
+    {Cat}               { return symbol(sym.CAT); }
 
     {paramColor}        { return symbol(sym.PARAMCOLOR); }
     {paramBackground}   { return symbol(sym.PARAMBACKGROUND); }
     {paramFont}         { return symbol(sym.PARAMFONT); }
     {paramSize}         { return symbol(sym.PARAMSIZE); }
     {paramBorder}       { return symbol(sym.PARAMBORDER); }
-    {typeFont}         { return symbol(sym.TYPEFONT, yytext()); }
-    {typeBorder}       { return symbol(sym.TYPEBORDER, yytext()); }
+
+    "MONO"              { return symbol(sym.MONO); }
+    "CURSIVE"           { return symbol(sym.CURSIVE); }
+    "SANS_SERIF"        { return symbol(sym.SANS_SERIF); }
+
+    "LINE"              { return symbol(sym.LINE); }
+    "DOTTED"            { return symbol(sym.DOTTED); }
+    "DOUBLE"            { return symbol(sym.DOUBLE); }
+
     {idVar}             { return symbol(sym.ID, yytext()); }
     {Comment}           {}
 
@@ -210,4 +270,3 @@ idVar = [a-zA-Z_][a-zA-Z0-9_]*
 <<EOF>>    {
                 return symbol(sym.EOF);
            }
-
