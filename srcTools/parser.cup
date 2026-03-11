@@ -1,0 +1,85 @@
+/****************** packages and imports **************/
+
+package com.joseruiz.formMaker.compiler;
+
+import java_cup.runtime.*;
+import java.util.*;
+
+/*------------------------------------------------------
+                        CUP
+--------------------------------------------------------*/
+parser code {:
+
+    Lexer lex;
+    private List<String> syntaxErrors;
+
+    // conexion de parser y lexer
+    public Parser(Lexer lex){
+        super(lex);
+        syntaxErrors = new ArrayList<>();
+    }
+
+    // getters
+    public Lexer getLexer(){
+        return this.lex;
+    }
+
+    public List<String> getSyntaxErrors(){
+        return this.syntaxErrors;
+    }
+
+    // metodos de error
+    public void syntax_error(Symbol cur_token){
+        syntaxErrors.add("Error sintactico");
+    }
+
+    public void unrecovered_syntax_error(Symbol cur_token){
+        syntaxErrors.add("Error que no se puede recuperar");
+    }
+
+:}
+
+/*----------------------------------------------------------
+                         reglas
+-----------------------------------------------------------*/
+
+/* Terminales: tokens que el parser nos retorna */
+terminal     PLUS, MINUS, TIMES, DIVIDE, POWER, MOD, LPAREN,RPAREN,
+             GT, LT, GTE, LTE, EQ, NEQ,
+             AND, OR, NOT,
+             TYPENUMBER, TYPESTRING, TYPESPECIAL,
+             ASSIGN,
+             LBRACE, RBRACE, LBRACKET, RBRACKET, COLON, SEMICOLON, COMMA, DOT, COMODIN,
+             SECTION, WIDTH, HEIGHT, LABEL, OPTIONS, CONTENT, POINTX, POINTY, ORIENTATION,
+              VERTICAL, HORIZONTAL, ELEMENTS, STYLES, TABLE, TEXT,
+              OPEN_QUESTION, DROP_QUESTION, CORRECT, SELECT_QUESTION, MULTIPLE_QUESTION, DRAW,
+              IF, ELSE, WHILE, DO, FOR, IN, RANGE,
+              RED, BLUE, GREEN, PURPLE, SKY, YELLOW, BLACK, WHITE,
+              HEX_COLOR, RGB_COLOR, HSL_COLOR,
+              NUMBER,
+              SMILE, SAD, SERIOUS, HEART, STAR, STAR_COLS, STAR_DASH, CAT,
+              PARAMCOLOR, PARAMBACKGROUND, PARAMFONT, PARAMSIZE, PARAMBORDER,
+              MONO, CURSIVE, SANS_SERIF,
+              LINE, DOTTED, DOUBLE,
+              ID
+            ;
+
+/* no terminales, reglas que nosotros vamos a definir sintacticamente */
+non terminal sentence, subject, verb, emoji
+            ;
+
+/* Gramatica: reglas para validacion */
+
+start with sentence;
+
+sentence ::= subject verb COMPLEMENT emoji POINT
+            ;
+
+subject ::= I | YOU | HE | SHE | IT | WE | THEY
+            ;
+
+verb ::= HAVE | HAS | SING | SINGS | DRIVE | DRIVES | WALK | WALKS
+            ;
+
+emoji ::= HAPPY | SAD | SERIOUS | /* empty */
+            ;

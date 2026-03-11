@@ -97,9 +97,14 @@ idVar = [a-zA-Z_][a-zA-Z0-9_]*
             return new ArrayList<>(HSLvalues) ;
         }
 
-        private Integer extractStars(String starText){
+        private String extractStars(String starText){
            String cleaned = starText.replaceAll("[^0-9]", "");
-           return Integer.parseInt(cleaned);
+           Integer number =  Integer.parseInt(cleaned);
+           String result = "";
+           for (int i = 0; i < number; i++) {
+                result += "\u2B50";
+           }
+            return result;
         }
 
         /* Codigo para el manejo de errores */
@@ -218,15 +223,6 @@ idVar = [a-zA-Z_][a-zA-Z0-9_]*
                          }
                         }
 
-    {Smile}             { return symbol(sym.SMILE); }
-    {Sad}               { return symbol(sym.SAD); }
-    {Serious}           { return symbol(sym.SERIOUS); }
-    {Heart}             { return symbol(sym.HEART); }
-    {StarSimple}        { return symbol(sym.STAR); }
-    {StarCols}          { return symbol(sym.STAR_COLS, extractStars(yytext())); }
-    {StarDash}          { return symbol(sym.STAR_DASH, extractStars(yytext())); }
-    {Cat}               { return symbol(sym.CAT); }
-
     {paramColor}        { return symbol(sym.PARAMCOLOR); }
     {paramBackground}   { return symbol(sym.PARAMBACKGROUND); }
     {paramFont}         { return symbol(sym.PARAMFONT); }
@@ -256,6 +252,16 @@ idVar = [a-zA-Z_][a-zA-Z0-9_]*
                             return symbol(sym.STRCHAIN, string.toString());
 
                         }
+
+    {Smile}             { string.append( "\uD83D\uDE00" ); }
+    {Sad}               { string.append( "\uD83D\uDE22"); }
+    {Serious}           { string.append( "\uD83D\uDE10"); }
+    {Heart}             { string.append( "\u2764\uFE0F" ); }
+    {StarSimple}        { string.append( "\u2B50" ); }
+    {StarCols}          { string.append( extractStars(yytext()) ); }
+    {StarDash}          { string.append( extractStars(yytext()) ); }
+    {Cat}               { string.append( "\uD83D\uDC31" ); }
+
     [^\n\r\"\\]+        { string.append( yytext() ); }
     \\t                 { string.append('\t'); }
     \\n                 { string.append('\n'); }
