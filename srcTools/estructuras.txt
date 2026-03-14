@@ -65,8 +65,6 @@ Esto es un comentario de varias líneas
 @[:star-number:] Permite agregar muchas estrellas a la vez, según el número.
 @[:^^:] @[:cat:]
 
-(?:rgb\\((?:\\s*(?:\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\s*,?){3}\\))
-
 #FFFFFF Formato Hex
 (10,10,10) Formato RGB
 <10,10,10> Formato HSL

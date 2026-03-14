@@ -57,29 +57,332 @@ terminal     PLUS, MINUS, TIMES, DIVIDE, POWER, MOD, LPAREN,RPAREN,
               RED, BLUE, GREEN, PURPLE, SKY, YELLOW, BLACK, WHITE,
               HEX_COLOR, RGB_COLOR, HSL_COLOR,
               NUMBER,
-              SMILE, SAD, SERIOUS, HEART, STAR, STAR_COLS, STAR_DASH, CAT,
               PARAMCOLOR, PARAMBACKGROUND, PARAMFONT, PARAMSIZE, PARAMBORDER,
               MONO, CURSIVE, SANS_SERIF,
               LINE, DOTTED, DOUBLE,
-              ID
+              ID, STRCHAIN,
+              POKEAPI
             ;
 
+// TODO: agregar lo demás
 /* no terminales, reglas que nosotros vamos a definir sintacticamente */
-non terminal sentence, subject, verb, emoji
-            ;
+non terminal codigo,
+iniciarInt, iniciarString, iniciarSpecial, reasignarInt, reasignarString, reasignarSpecial, drawFunction,
+ifStatement, elseStatement, whileStatement, doWhileStatement, forStatement, expression,
+section, secPropertiesList, secProperty, secStylesList, secStyle, secElementsList, secElement,
+UIelementsList, UIelement, text, textPropertiesList, textProperty, textStylesList, textStyle,
+questionsList, question, questionPropertiesList, questionProperty, questionStylesList, questionStyle,
+table, tablePropertiesList, tableProperty, tableStylesList, tableStyle, tableElementsList, tableElement
+;
+
+
+
 
 /* Gramatica: reglas para validacion */
 
-start with sentence;
+start with codigo;
 
-sentence ::= subject verb COMPLEMENT emoji POINT
+codigo ::= iniciarInt
+        | iniciarString
+        | iniciarSpecial
+        | reasignarInt
+        | reasignarString
+        | reasignarSpecial
+        | ifStatement
+        | whileStatement
+        | doWhileStatement
+        | forStatement
+        | section
+        | table
+        ;
+
+iniciarInt ::= TYPENUMBER ID
+            | TYPENUMBER ID ASSIGN NUMBER
             ;
 
-subject ::= I | YOU | HE | SHE | IT | WE | THEY
+iniciarString ::= TYPESTRING ID
+            | TYPESTRING ID ASSIGN STRCHAIN
             ;
 
-verb ::= HAVE | HAS | SING | SINGS | DRIVE | DRIVES | WALK | WALKS
+iniciarSpecial ::= TYPESPECIAL ID ASSIGN question;
+
+reasignarInt ::= ID ASSIGN NUMBER
             ;
 
-emoji ::= HAPPY | SAD | SERIOUS | /* empty */
+reasignarString ::= ID ASSIGN STRCHAIN
             ;
+
+reasignarSpecial ::= ID ASSIGN question
+            ;
+
+ifStatement ::= IF LPAREN expression RPAREN LBRACE codigoSimple RBRACE elseStatement
+            ;
+
+elseStatement ::= ELSE IF LPAREN expression RPAREN LBRACE codigoSimple RBRACE elseStatement
+            | ELSE LBRACE codigoSimple RBRACE
+            |
+            ;
+
+whileStatement ::= WHILE LPAREN expression RPAREN LBRACE codigoSimple RBRACE
+                ;
+
+doWhileStatement ::= DO LBRACE codigoSimple RBRACE WHILE LPAREN expression RPAREN
+                ;
+
+forStatement ::= FOR LPAREN reasignarInt SEMICOLON expression SEMICOLON reasignarInt RPAREN LBRACE codigoSimple RBRACE
+                | FOR LPAREN ID IN NUMBER RANGE NUMBER RPAREN LBRACE codigoSimple RBRACE
+                ;
+
+expression ::= expression OR expression2
+            | expression AND expression2
+            | expression2
+            ;
+
+expression2 ::= NOT expression2
+            | comparison
+            ;
+
+comparison ::= math GT math
+            | math LT math
+            | math GTE math
+            | math LTE math
+            | math EQ math
+            | math NEQ math
+            | math
+            ;
+
+math ::= math PLUS term1
+        | math MINUS term1
+        | term1
+        ;
+
+term1 ::= term1 TIMES term2
+        | term1 DIVIDE term2
+        | term2
+        ;
+
+term2 ::= term2 POWER term3
+        | term2 MOD term3
+        | term3
+        ;
+
+term3 ::= LPAREN expression RPAREN
+        | NUMBER
+        | ID
+        | MINUS term3
+        ;
+
+codigoSimple ::= codigoSimple codigoSimple2
+                | codigoSimple2
+                ;
+
+codigoSimple2 ::= iniciarInt
+                | iniciarString
+                | iniciarSpecial
+                | reasignarInt
+                | reasignarString
+                | reasignarSpecial
+                | ifStatement
+                | whileStatement
+                | doWhileStatement
+                | forStatement
+                ;
+
+section ::= SECTION LBRACKET secPropertiesList ELEMENTS COLON LBRACE secElementsList RBRACE secStylesOrNo RBRACKET
+            ;
+
+secStylesOrNo ::= COMMA STYLES LBRACKET secStylesList RBRACKET
+            |
+            ;
+
+secPropertiesList ::= secPropertiesList COMMA secProperty
+                    | secProperty
+                    ;
+
+secProperty ::= WIDTH COLON NUMBER
+                | HEIGHT COLON NUMBER
+                | POINTX COLON NUMBER
+                | POINTY COLON NUMBER
+                | ORIENTATION COLON spVerticalHorizontal
+                ;
+
+spVerticalHorizontal ::= VERTICAL
+                        | HORIZONTAL
+                        ;
+
+secElementsList ::= ELEMENTS COLON LBRACE UIelementsList RBRACE
+                    ;
+
+UIelementsList ::= UIelementsList COMMA UIelement
+                    | UIelement
+                    ;
+
+UIelement ::= section
+            | table
+            | text
+            | renderQuestion
+            ;
+
+text ::= TEXT LBRACKET textPropertiesList textStylesOrNo RBRACKET
+        ;
+
+textPropertiesList ::= textPropertiesList COMMA textProperty COMMA
+                    | textProperty
+                    ;
+
+textProperty ::= WIDTH COLON NUMBER
+                | HEIGHT COLON NUMBER
+                | CONTENT COLON STRCHAIN
+                ;
+
+textStylesOrNo ::= COMMA STYLES LBRACKET textStylesList RBRACKET
+                    |
+                    ;
+
+textStylesList ::= textstylesList COMMA textStyle
+                    | textStyle
+                    ;
+
+textStyle ::= PARAMCOLOR COLON color
+            | PARAMBACKGROUND COLON color
+            | PARAMFONT COLON font
+            | PARAMSIZE COLON NUMBER
+            ;
+
+color ::= HEX_COLOR
+        | RGB_COLOR
+        | HSL_COLOR
+        | RED
+        | BLUE
+        | GREEN
+        | PURPLE
+        | SKY
+        | YELLOW
+        | BLACK
+        | WHITE
+        ;
+
+font ::= MONO
+        | CURSIVE
+        | SANS_SERIF
+        ;
+
+renderQuestion ::= ID DOT DRAW LPAREN paramsRenderList RPAREN
+                ;
+
+paramsRenderList ::= paramsRenderList COMMA paramRender
+                | paramRender
+                ;
+
+paramRender ::= ID
+                | NUMBER
+                | STRCHAIN
+                | math
+                ;
+
+question ::= OPEN_QUESTION LBRACKET questionPropertiesList questionStylesOrNo RBRACKET
+            | DROP_QUESTION LBRACKET questionPropertiesList OPTIONS COLON optionsThing correctOrNO questionStylesOrNo RBRACKET
+            | SELECT_QUESTION LBRACKET questionPropertiesList OPTIONS COLON optionsThing correctOrNO questionStylesOrNo RBRACKET
+            | MULTIPLE_QUESTION LBRACKET questionPropertiesList OPTIONS COLON optionsThing correctOrNO questionStylesOrNo RBRACKET
+            ;
+
+questionPropertiesList ::= questionPropertiesList COMMA questionProperty
+                    | questionProperty
+                    ;
+
+questionProperty ::= WIDTH COLON NUMBER
+                | HEIGHT COLON NUMBER
+                | LABEL COLON STRCHAIN
+                ;
+
+questionStylesOrNo ::= COMMA STYLES LBRACKET questionStylesList RBRACKET
+                    |
+                    ;
+
+questionStylesList ::= questionStylesList COMMA questionStyle
+                    | questionStyle
+                    ;
+
+questionStyle ::= PARAMCOLOR COLON color
+            | PARAMBACKGROUND COLON color
+            | PARAMFONT COLON font
+            | PARAMSIZE COLON NUMBER
+            ;
+
+optionsThing ::= LBRACE optionsThing2 RBRACE
+                | apiPokemonSyntax
+                ;
+
+optionsThing2 ::= optionsThing2 COMMA option
+                | option
+                ;
+
+option ::= STRCHAIN
+        ;
+
+apiPokemonSyntax ::= POKEAPI LPAREN apiPokParamList RPAREN
+        ;
+
+apiPokParamList ::= apiPokParamList COMMA apiPokParam
+                    | apiPokParam
+                    ;
+
+apiPokParam ::= NUMBER
+                | STRCHAIN
+                ;
+
+table::= TABLE LBRACKET tablePropertiesList COMMA tableElementsList tableStylesOrNo RBRACKET
+        ;
+
+tablePropertiesList ::= tablePropertiesList COMMA tableProperty
+                    | tableProperty
+                    ;
+
+tableProperty ::= WIDTH COLON NUMBER
+                | HEIGHT COLON NUMBER
+                | POINTX COLON NUMBER
+                | POINTY COLON NUMBER
+                ;
+
+tableElementsList ::= ELEMENTS COLON LBRACE tableElementComponents RBRACE
+                    ;
+
+tableElementComponents ::= tableElementComponents COMMA tableLine
+                    | tableLine
+                    ;
+
+tableLine ::=  LBRACKET tableElement RBRACKET
+            ;
+
+tableElement ::= tableElement COMMA tableElement2
+            | tableElement2
+            ;
+
+tableElement2 ::= LBRACE tableAllowedElements RBRACE
+                ;
+
+tableAllowedElements ::= tableAllowedElements COMMA tableAllowedElement
+                    | tableAllowedElement
+                    ;
+
+tableAllowedElement ::= UIelement;
+
+tableStylesOrNo ::= COMMA STYLES LBRACKET tableStylesList RBRACKET
+                    |
+                    ;
+
+tableStylesList ::= tableStylesList COMMA tableStyle
+                    | tableStyle
+                    ;
+
+tableStyle ::= PARAMCOLOR COLON color
+            | PARAMBACKGROUND COLON color
+            | PARAMFONT COLON font
+            | PARAMSIZE COLON NUMBER
+            | PARAMBORDER COLON borderStyle
+            ;
+
+borderStyle ::= LPAREN NUMBER COMMA typeBorder COMMA color RPAREN
+            ;
+
+typeBorder ::= LINE | DOTTED | DOUBLE;

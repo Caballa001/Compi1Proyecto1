@@ -62,6 +62,7 @@ lineComment = "$"[^\\n]*
 blockComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 Comment = {lineComment} | {blockComment}
 
+pokeApi = "who_is_that_pokemon"
 idVar = [a-zA-Z_][a-zA-Z0-9_]*
 
 %{
@@ -236,6 +237,8 @@ idVar = [a-zA-Z_][a-zA-Z0-9_]*
     "LINE"              { return symbol(sym.LINE); }
     "DOTTED"            { return symbol(sym.DOTTED); }
     "DOUBLE"            { return symbol(sym.DOUBLE); }
+
+    "who_is_that_pokemon" { return symbol(sym.POKEAPI); }
 
     {idVar}             { return symbol(sym.ID, yytext()); }
     {Comment}           {}
