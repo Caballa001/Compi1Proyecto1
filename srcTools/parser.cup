@@ -14,7 +14,7 @@ parser code {:
     private List<String> syntaxErrors;
 
     // conexion de parser y lexer
-    public Parser(Lexer lex){
+    public parser(Lexer lex){
         super(lex);
         syntaxErrors = new ArrayList<>();
     }
@@ -67,12 +67,16 @@ terminal     PLUS, MINUS, TIMES, DIVIDE, POWER, MOD, LPAREN,RPAREN,
 // TODO: agregar lo demás
 /* no terminales, reglas que nosotros vamos a definir sintacticamente */
 non terminal codigo,
-iniciarInt, iniciarString, iniciarSpecial, reasignarInt, reasignarString, reasignarSpecial, drawFunction,
+iniciarInt, iniciarString, iniciarSpecial, reasignarInt, reasignarString, reasignarSpecial,
 ifStatement, elseStatement, whileStatement, doWhileStatement, forStatement, expression,
 section, secPropertiesList, secProperty, secStylesList, secStyle, secElementsList, secElement,
 UIelementsList, UIelement, text, textPropertiesList, textProperty, textStylesList, textStyle,
 questionsList, question, questionPropertiesList, questionProperty, questionStylesList, questionStyle,
-table, tablePropertiesList, tableProperty, tableStylesList, tableStyle, tableElementsList, tableElement
+table, tablePropertiesList, tableProperty, tableStylesList, tableStyle, tableElementsList, tableElement,
+secStylesOrNo, spVerticalHorizontal, textStylesOrNo, questionStylesOrNo, renderQuestion, paramsRenderList, paramRender,
+optionsThing, optionsThing2, option, apiPokemonSyntax, apiPokParamList, apiPokParam,
+correctOrNo, correctList, correctElement, tableElement2, tableAllowedElements, tableAllowedElement,
+tableStylesOrNo, borderStyle, typeBorder, textValue, labelValue
 ;
 
 
@@ -82,19 +86,23 @@ table, tablePropertiesList, tableProperty, tableStylesList, tableStyle, tableEle
 
 start with codigo;
 
-codigo ::= iniciarInt
-        | iniciarString
-        | iniciarSpecial
-        | reasignarInt
-        | reasignarString
-        | reasignarSpecial
-        | ifStatement
-        | whileStatement
-        | doWhileStatement
-        | forStatement
-        | section
-        | table
+codigo ::= codigo instruccion
+        | instruccion
         ;
+
+ instruccion ::= iniciarInt
+                | iniciarString
+                | iniciarSpecial
+                | reasignarInt
+                | reasignarString
+                | reasignarSpecial
+                | ifStatement
+                | whileStatement
+                | doWhileStatement
+                | forStatement
+                | section
+                | table
+                ;
 
 iniciarInt ::= TYPENUMBER ID
             | TYPENUMBER ID ASSIGN NUMBER
@@ -169,6 +177,7 @@ term2 ::= term2 POWER term3
 term3 ::= LPAREN expression RPAREN
         | NUMBER
         | ID
+        | COMODIN
         | MINUS term3
         ;
 
@@ -199,10 +208,10 @@ secPropertiesList ::= secPropertiesList COMMA secProperty
                     | secProperty
                     ;
 
-secProperty ::= WIDTH COLON NUMBER
-                | HEIGHT COLON NUMBER
-                | POINTX COLON NUMBER
-                | POINTY COLON NUMBER
+secProperty ::= WIDTH COLON math
+                | HEIGHT COLON math
+                | POINTX COLON math
+                | POINTY COLON math
                 | ORIENTATION COLON spVerticalHorizontal
                 ;
 
@@ -210,7 +219,7 @@ spVerticalHorizontal ::= VERTICAL
                         | HORIZONTAL
                         ;
 
-secElementsList ::= ELEMENTS COLON LBRACE UIelementsList RBRACE
+secElementsList ::= UIelementsList
                     ;
 
 UIelementsList ::= UIelementsList COMMA UIelement
@@ -226,20 +235,24 @@ UIelement ::= section
 text ::= TEXT LBRACKET textPropertiesList textStylesOrNo RBRACKET
         ;
 
-textPropertiesList ::= textPropertiesList COMMA textProperty COMMA
+textPropertiesList ::= textPropertiesList COMMA textProperty
                     | textProperty
                     ;
 
-textProperty ::= WIDTH COLON NUMBER
-                | HEIGHT COLON NUMBER
-                | CONTENT COLON STRCHAIN
+textProperty ::= WIDTH COLON math
+                | HEIGHT COLON math
+                | CONTENT COLON textValue
                 ;
+
+textValue ::= STRCHAIN
+            | ID
+            ;
 
 textStylesOrNo ::= COMMA STYLES LBRACKET textStylesList RBRACKET
                     |
                     ;
 
-textStylesList ::= textstylesList COMMA textStyle
+textStylesList ::= textStylesList COMMA textStyle
                     | textStyle
                     ;
 
@@ -274,26 +287,29 @@ paramsRenderList ::= paramsRenderList COMMA paramRender
                 | paramRender
                 ;
 
-paramRender ::= ID
-                | NUMBER
-                | STRCHAIN
+paramRender ::= STRCHAIN
                 | math
                 ;
 
 question ::= OPEN_QUESTION LBRACKET questionPropertiesList questionStylesOrNo RBRACKET
-            | DROP_QUESTION LBRACKET questionPropertiesList OPTIONS COLON optionsThing correctOrNO questionStylesOrNo RBRACKET
-            | SELECT_QUESTION LBRACKET questionPropertiesList OPTIONS COLON optionsThing correctOrNO questionStylesOrNo RBRACKET
-            | MULTIPLE_QUESTION LBRACKET questionPropertiesList OPTIONS COLON optionsThing correctOrNO questionStylesOrNo RBRACKET
+            | DROP_QUESTION LBRACKET questionPropertiesList COMMA OPTIONS COLON optionsThing correctOrNo questionStylesOrNo RBRACKET
+            | SELECT_QUESTION LBRACKET questionPropertiesList COMMA OPTIONS COLON optionsThing correctOrNo questionStylesOrNo RBRACKET
+            | MULTIPLE_QUESTION LBRACKET questionPropertiesList COMMA OPTIONS COLON optionsThing correctOrNo questionStylesOrNo RBRACKET
             ;
 
 questionPropertiesList ::= questionPropertiesList COMMA questionProperty
                     | questionProperty
                     ;
 
-questionProperty ::= WIDTH COLON NUMBER
-                | HEIGHT COLON NUMBER
-                | LABEL COLON STRCHAIN
+questionProperty ::= WIDTH COLON math
+                | HEIGHT COLON math
+                | LABEL COLON labelValue
                 ;
+
+labelValue ::= STRCHAIN
+            | ID
+            | COMODIN
+            ;
 
 questionStylesOrNo ::= COMMA STYLES LBRACKET questionStylesList RBRACKET
                     |
@@ -331,6 +347,18 @@ apiPokParam ::= NUMBER
                 | STRCHAIN
                 ;
 
+correctOrNo ::= COMMA CORRECT COLON LBRACE correctList RBRACE
+                |
+                ;
+
+correctList ::= correctList COMMA correctElement
+                | correctElement
+                ;
+
+correctElement ::= math
+                ;
+
+
 table::= TABLE LBRACKET tablePropertiesList COMMA tableElementsList tableStylesOrNo RBRACKET
         ;
 
@@ -338,10 +366,10 @@ tablePropertiesList ::= tablePropertiesList COMMA tableProperty
                     | tableProperty
                     ;
 
-tableProperty ::= WIDTH COLON NUMBER
-                | HEIGHT COLON NUMBER
-                | POINTX COLON NUMBER
-                | POINTY COLON NUMBER
+tableProperty ::= WIDTH COLON math
+                | HEIGHT COLON math
+                | POINTX COLON math
+                | POINTY COLON math
                 ;
 
 tableElementsList ::= ELEMENTS COLON LBRACE tableElementComponents RBRACE
