@@ -40,7 +40,6 @@ width: number,
 height: number,
 label: number
 ]
-myQuestion.draw()
 
 special myQuestion = OPEN_QUESTION [
 width: ?,
@@ -79,6 +78,8 @@ SECTION [
     pointY: number,
     orientation: VERTICAL,
     elements: {
+    myQuestion.draw(params)
+    }
     },
     TODO: Seguir
     styles [

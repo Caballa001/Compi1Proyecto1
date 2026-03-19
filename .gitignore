@@ -16,3 +16,7 @@ gradle.properties
 .cxx
 local.properties
 /DOCS/TODO.txt
+srcTools/Lexer.java
+srcTools/Parser.java
+srcTools/Sym.java
+srcTools/Lexer.java

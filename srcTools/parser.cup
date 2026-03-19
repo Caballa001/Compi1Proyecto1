@@ -14,7 +14,7 @@ parser code {:
     private List<String> syntaxErrors;
 
     // conexion de parser y lexer
-    public parser(Lexer lex){
+    public Parser(Lexer lex){
         super(lex);
         syntaxErrors = new ArrayList<>();
     }
@@ -61,7 +61,7 @@ terminal     PLUS, MINUS, TIMES, DIVIDE, POWER, MOD, LPAREN,RPAREN,
               MONO, CURSIVE, SANS_SERIF,
               LINE, DOTTED, DOUBLE,
               ID, STRCHAIN,
-              POKEAPI
+              POKEAPI, APINUMBER
             ;
 
 // TODO: agregar lo demás
@@ -69,14 +69,17 @@ terminal     PLUS, MINUS, TIMES, DIVIDE, POWER, MOD, LPAREN,RPAREN,
 non terminal codigo,
 iniciarInt, iniciarString, iniciarSpecial, reasignarInt, reasignarString, reasignarSpecial,
 ifStatement, elseStatement, whileStatement, doWhileStatement, forStatement, expression,
-section, secPropertiesList, secProperty, secStylesList, secStyle, secElementsList, secElement,
+section, secPropertiesList, secProperty, secStylesList, secStyle, secElementsList,
 UIelementsList, UIelement, text, textPropertiesList, textProperty, textStylesList, textStyle,
-questionsList, question, questionPropertiesList, questionProperty, questionStylesList, questionStyle,
-table, tablePropertiesList, tableProperty, tableStylesList, tableStyle, tableElementsList, tableElement,
+question, questionPropertiesList, questionProperty, questionStylesList, questionStyle,
+table, tablePropertiesList, tableProperty, tableStylesList, tableStyle, tableElementsList, tableElement, tableElementComponents,
 secStylesOrNo, spVerticalHorizontal, textStylesOrNo, questionStylesOrNo, renderQuestion, paramsRenderList, paramRender,
 optionsThing, optionsThing2, option, apiPokemonSyntax, apiPokParamList, apiPokParam,
-correctOrNo, correctList, correctElement, tableElement2, tableAllowedElements, tableAllowedElement,
-tableStylesOrNo, borderStyle, typeBorder, textValue, labelValue
+correctOrNo, correctList, correctElement, tableElement2, tableAllowedElements,
+tableStylesOrNo, borderStyle, typeBorder, textValue, labelValue,
+instruccion, expression2, comparison, math, term1, term2, term3,
+codigoSimple, codigoSimple2, tableLine,
+color, font, questionOptionalParams, questionOptional
 ;
 
 
@@ -87,7 +90,7 @@ tableStylesOrNo, borderStyle, typeBorder, textValue, labelValue
 start with codigo;
 
 codigo ::= codigo instruccion
-        | instruccion
+        | // Sin instrucciones
         ;
 
  instruccion ::= iniciarInt
@@ -105,16 +108,17 @@ codigo ::= codigo instruccion
                 ;
 
 iniciarInt ::= TYPENUMBER ID
-            | TYPENUMBER ID ASSIGN NUMBER
+            | TYPENUMBER ID ASSIGN math
             ;
 
 iniciarString ::= TYPESTRING ID
             | TYPESTRING ID ASSIGN STRCHAIN
+            | TYPESTRING ID ASSIGN ID
             ;
 
 iniciarSpecial ::= TYPESPECIAL ID ASSIGN question;
 
-reasignarInt ::= ID ASSIGN NUMBER
+reasignarInt ::= ID ASSIGN math
             ;
 
 reasignarString ::= ID ASSIGN STRCHAIN
@@ -182,7 +186,7 @@ term3 ::= LPAREN expression RPAREN
         ;
 
 codigoSimple ::= codigoSimple codigoSimple2
-                | codigoSimple2
+                | // Sin instrucciones
                 ;
 
 codigoSimple2 ::= iniciarInt
@@ -197,11 +201,22 @@ codigoSimple2 ::= iniciarInt
                 | forStatement
                 ;
 
-section ::= SECTION LBRACKET secPropertiesList ELEMENTS COLON LBRACE secElementsList RBRACE secStylesOrNo RBRACKET
+section ::= SECTION LBRACKET secPropertiesList COMMA ELEMENTS COLON LBRACE secElementsList RBRACE secStylesOrNo RBRACKET
             ;
 
 secStylesOrNo ::= COMMA STYLES LBRACKET secStylesList RBRACKET
             |
+            ;
+
+secStylesList ::= secStylesList COMMA secStyle
+                    | secStyle
+                    ;
+
+secStyle ::= PARAMCOLOR COLON color
+            | PARAMBACKGROUND COLON color
+            | PARAMFONT COLON font
+            | PARAMSIZE COLON NUMBER
+            | PARAMBORDER COLON borderStyle
             ;
 
 secPropertiesList ::= secPropertiesList COMMA secProperty
@@ -285,6 +300,7 @@ renderQuestion ::= ID DOT DRAW LPAREN paramsRenderList RPAREN
 
 paramsRenderList ::= paramsRenderList COMMA paramRender
                 | paramRender
+                | // Sin params
                 ;
 
 paramRender ::= STRCHAIN
@@ -292,9 +308,9 @@ paramRender ::= STRCHAIN
                 ;
 
 question ::= OPEN_QUESTION LBRACKET questionPropertiesList questionStylesOrNo RBRACKET
-            | DROP_QUESTION LBRACKET questionPropertiesList COMMA OPTIONS COLON optionsThing correctOrNo questionStylesOrNo RBRACKET
-            | SELECT_QUESTION LBRACKET questionPropertiesList COMMA OPTIONS COLON optionsThing correctOrNo questionStylesOrNo RBRACKET
-            | MULTIPLE_QUESTION LBRACKET questionPropertiesList COMMA OPTIONS COLON optionsThing correctOrNo questionStylesOrNo RBRACKET
+            | DROP_QUESTION LBRACKET questionPropertiesList COMMA OPTIONS COLON optionsThing questionOptionalParams RBRACKET
+            | SELECT_QUESTION LBRACKET questionPropertiesList COMMA OPTIONS COLON optionsThing questionOptionalParams RBRACKET
+            | MULTIPLE_QUESTION LBRACKET questionPropertiesList COMMA OPTIONS COLON optionsThing questionOptionalParams RBRACKET
             ;
 
 questionPropertiesList ::= questionPropertiesList COMMA questionProperty
@@ -343,12 +359,12 @@ apiPokParamList ::= apiPokParamList COMMA apiPokParam
                     | apiPokParam
                     ;
 
-apiPokParam ::= NUMBER
-                | STRCHAIN
+apiPokParam ::= APINUMBER
+                |NUMBER
                 ;
 
-correctOrNo ::= COMMA CORRECT COLON LBRACE correctList RBRACE
-                |
+correctOrNo ::= LBRACE correctList RBRACE
+                | math
                 ;
 
 correctList ::= correctList COMMA correctElement
@@ -357,6 +373,14 @@ correctList ::= correctList COMMA correctElement
 
 correctElement ::= math
                 ;
+
+questionOptionalParams ::= COMMA questionOptional
+                        |
+                        ;
+
+questionOptional ::= CORRECT COLON correctOrNo questionStylesOrNo
+                    | STYLES LBRACKET questionStylesList RBRACKET
+                    ;
 
 
 table::= TABLE LBRACKET tablePropertiesList COMMA tableElementsList tableStylesOrNo RBRACKET
@@ -389,11 +413,7 @@ tableElement ::= tableElement COMMA tableElement2
 tableElement2 ::= LBRACE tableAllowedElements RBRACE
                 ;
 
-tableAllowedElements ::= tableAllowedElements COMMA tableAllowedElement
-                    | tableAllowedElement
-                    ;
-
-tableAllowedElement ::= UIelement;
+tableAllowedElements ::= UIelement; // Solo un elemento por celda
 
 tableStylesOrNo ::= COMMA STYLES LBRACKET tableStylesList RBRACKET
                     |

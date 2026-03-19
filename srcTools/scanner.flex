@@ -13,7 +13,6 @@ import java.util.*;
 %cup
 %line
 %column
-%ignorecase
 
 
 /********************** estados *********************************/
@@ -58,7 +57,7 @@ Cat = @\[:cat:\] | @\[:\^\^:\]
 
 Number = {Float} | {Integer}
 
-lineComment = "$"[^\\n]*
+lineComment = "$"[^\r\n]*
 blockComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 Comment = {lineComment} | {blockComment}
 
@@ -119,6 +118,10 @@ idVar = [a-zA-Z_][a-zA-Z0-9_]*
         /*-----------------------------------------------
               Codigo para el parser
         -------------------------------------------------*/
+        private Symbol symbol(int type){
+            return new Symbol(type, yyline+1, yycolumn+1);
+        }
+
         private Symbol symbol(int type, Object valor){
             return new Symbol(type, yyline+1, yycolumn+1, valor);
         }
@@ -238,7 +241,9 @@ idVar = [a-zA-Z_][a-zA-Z0-9_]*
     "DOTTED"            { return symbol(sym.DOTTED); }
     "DOUBLE"            { return symbol(sym.DOUBLE); }
 
-    "who_is_that_pokemon" { return symbol(sym.POKEAPI); }
+    {pokeApi}            { return symbol(sym.POKEAPI); }
+
+    "NUMBER"              { return symbol(sym.APINUMBER); }
 
     {idVar}             { return symbol(sym.ID, yytext()); }
     {Comment}           {}
