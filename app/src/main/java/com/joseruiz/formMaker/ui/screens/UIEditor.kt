@@ -46,6 +46,8 @@ import com.joseruiz.formMaker.Screen
 import com.joseruiz.formMaker.ui.components.ScrollableTable
 import com.joseruiz.formMaker.ui.components.Visualizar
 import kotlinx.coroutines.launch
+import com.joseruiz.formMaker.compiler.Analyzer
+
 
 
 @Preview
@@ -60,19 +62,31 @@ fun UIEditorPreview() {
 fun UIEditor(navController: NavController) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var textoEditor by remember { mutableStateOf(TextFieldValue("")) }
+    var textoActual by remember { mutableStateOf("") }
+    var tablaErrorDatos by remember { mutableStateOf<List<List<String>>>(emptyList()) }
+
+    fun cargarTexto(texto: String){
+        val errores = Analyzer().Analizar(texto)
+        tablaErrorDatos = errores.map { err->
+            listOf(err.lexema, err.linea.toString(), err.columna.toString(), err.tipo, err.descripcion)
+        }
+        if (errores.isNotEmpty()) {
+            scope.launch {
+                drawerState.open()
+            }
+        }
+    }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
                 val headers = listOf("Lexema", "Linea", "Columna", "Tipo", "Descripcion")
-                val sampleData = listOf(
-                    listOf("Lexema 1", "1", "1", "Tipo X", "Sin Errores")
-                )
                 ScrollableTable(
                     modifier = Modifier.padding(16.dp),
                     headers = headers,
-                    data = sampleData
+                    data = tablaErrorDatos
                 )
             }
         }
@@ -107,7 +121,10 @@ fun UIEditor(navController: NavController) {
                 NavigationBar {
                     NavigationBarItem(
                         selected = false,
-                        onClick = { /* todo */ },
+                        onClick = {
+                           textoActual = textoEditor.text
+                           cargarTexto(textoActual)
+                        },
                         icon = { Icon(
                             painter = painterResource(id = R.drawable.refresh_24px),
                             contentDescription = "Reemplazar") },
@@ -115,7 +132,10 @@ fun UIEditor(navController: NavController) {
                     )
                     NavigationBarItem(
                         selected = false,
-                        onClick = { /* todo */ },
+                        onClick = {
+                            textoActual = textoActual + "\n" + textoEditor.text
+                            cargarTexto(textoActual)
+                        },
                         icon = { Icon(
                             painter= painterResource(id = R.drawable.add_24px),
                             contentDescription = "Añadir") },
@@ -154,16 +174,24 @@ fun UIEditor(navController: NavController) {
             ) {
                 Visualizar(modifier = Modifier.weight(1f))
                 HorizontalDivider()
-                CodeEditor(modifier = Modifier.weight(1f))
+                CodeEditor(
+                    modifier = Modifier.weight(1f),
+                    codeState = textoEditor,
+                    onCodeChange = {
+                        textoEditor = it
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun CodeEditor(modifier: Modifier = Modifier){
-    var codeState by remember { mutableStateOf(TextFieldValue("")) }
-
+fun CodeEditor(
+    modifier: Modifier = Modifier,
+    codeState: TextFieldValue,
+    onCodeChange: (TextFieldValue) -> Unit
+){
     val cursorPosition = codeState.selection.start
     val textBeforeCursor = codeState.text.substring(0, cursorPosition)
     val filaCodigo = textBeforeCursor.count { it == '\n' } +1
@@ -199,7 +227,7 @@ fun CodeEditor(modifier: Modifier = Modifier){
 
             TextField(
                 value = codeState,
-                onValueChange = { codeState = it },
+                onValueChange = onCodeChange,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),

@@ -1,15 +1,14 @@
 package com.joseruiz.formMaker.compiler
 
-import java.io.BufferedReader
-import java.io.FileReader
+
+import java.io.StringReader
 
 public class Analyzer {
 
     fun Analizar(cadena: String): List<ErrorReport> {
         var listaErrores = ArrayList<ErrorReport>()
-        val reader = BufferedReader(FileReader(cadena))
 
-        val lexer = Lexer(reader)
+        val lexer = Lexer(StringReader(cadena))
         val parser = Parser(lexer)
 
         try {
@@ -29,6 +28,10 @@ public class Analyzer {
             return listaErrores
         }
         return listaErrores
+
+    }
+
+    fun Renderizar(){
 
     }
 

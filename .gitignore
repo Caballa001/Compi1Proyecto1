@@ -19,4 +19,3 @@ local.properties
 srcTools/Lexer.java
 srcTools/Parser.java
 srcTools/Sym.java
-srcTools/Lexer.java

@@ -277,6 +277,10 @@ idVar = [a-zA-Z_][a-zA-Z0-9_]*
     \\r                 { string.append('\r'); }
     \\\"                { string.append('\"'); }
     \\                  { string.append('\\'); }
+
+    <<EOF>>    {
+                    error("Cadena sin cerrar");
+                }
 }
 
 .          {  error(yytext()); }

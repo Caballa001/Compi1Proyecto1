@@ -11,30 +11,56 @@ import java.util.*;
 parser code {:
 
     Lexer lex;
-    private List<String> syntaxErrors;
+    private List<ErrorReport> errorList;
 
     // conexion de parser y lexer
     public Parser(Lexer lex){
         super(lex);
-        syntaxErrors = new ArrayList<>();
+        errorList = new ArrayList<>();
     }
 
     // getters
-    public Lexer getLexer(){
-        return this.lex;
+
+    public List<ErrorReport> getSyntaxErrors(){
+        return this.errorList;
     }
 
-    public List<String> getSyntaxErrors(){
-        return this.syntaxErrors;
+    private void customError(Symbol cur_token){
+        StringBuilder lexema = new StringBuilder();
+        if (cur_token.value != null) {
+            lexema.append(cur_token.value.toString());
+        } else {
+            lexema.append(symbl_name_from_id(cur_token.sym));
+        }
+
+        StringBuilder descripcionError = new StringBuilder();
+
+        if( expected_token_ids().isEmpty() ){
+            descripcionError.append("Ya no se esperaba ningun simbolo");
+        } else {
+            descripcionError.append(" Se esperaba: ");
+            for(Integer expected_token_id : expected_token_ids() ){
+                descripcionError.append(symbl_name_from_id(expected_token_id));
+                descripcionError.append(" ");
+            }
+        }
+
+        errorList.add(new ErrorReport(lexema.toString(), cur_token.left, cur_token.right, "Sintactico", descripcionError.toString()));
     }
 
     // metodos de error
     public void syntax_error(Symbol cur_token){
-        syntaxErrors.add("Error sintactico");
+        customError(cur_token);
     }
 
     public void unrecovered_syntax_error(Symbol cur_token){
-        syntaxErrors.add("Error que no se puede recuperar");
+        StringBuilder lexema = new StringBuilder();
+        if (cur_token.value != null) {
+            lexema.append(cur_token.value.toString());
+        } else {
+            lexema.append(symbl_name_from_id(cur_token.sym));
+        }
+        errorList.add(new ErrorReport(lexema.toString(), cur_token.left, cur_token.right, "Sintactico", "Error que no se puede recuperar"));
     }
 
 :}
